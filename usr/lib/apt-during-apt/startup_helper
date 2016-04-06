@@ -30,7 +30,12 @@ check_package_manager_running() {
 
 check_package_manager_running
 
-dpkg --install "/var/lib/apt-during-apt/initial-packages/"*".deb" && \
+export DEBIAN_FRONTEND="noninteractive"
+export DEBIAN_PRIORITY="critical"
+export DEBCONF_NOWARNINGS="yes"
+export APT_LISTCHANGES_FRONTEND="none"
+
+dpkg --force-confold --install "/var/lib/apt-during-apt/initial-packages/"*".deb" && \
    rm "/var/lib/apt-during-apt/initial-packages/"*".deb"
 
 true $?
