@@ -1,0 +1,36 @@
+#!/bin/bash
+
+## This file is part of Whonix.
+## Copyright (C) 2012 - 2014 Patrick Schleizer <adrelanos@riseup.net>
+## See the file COPYING for copying conditions.
+
+set -x
+set -e
+
+if [ "$(ls -A "/var/lib/apt-during-apt/initial-packages/"*".deb")" ]; then
+   true
+else
+   exit 0
+fi
+
+source /usr/lib/anon-shared-helper-scripts/pkg_manager_running_check
+
+check_package_manager_running() {
+   check_package_manager_running_helper
+
+   if [ "$check_apt_get_exit_code" = "0" ]; then
+      local MSG="Check Package Manager Running Result: None running, ok."
+      return 0
+   fi
+
+   sleep "1" &
+   wait "$!" || true
+   check_package_manager_running
+}
+
+check_package_manager_running
+
+dpkg --install "/var/lib/apt-during-apt/initial-packages/"*".deb" && \
+   rm "/var/lib/apt-during-apt/initial-packages/"*".deb"
+
+true $?

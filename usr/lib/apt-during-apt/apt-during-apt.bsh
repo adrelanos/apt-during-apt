@@ -1,0 +1,84 @@
+#!/bin/bash
+
+## This file is part of Whonix.
+## Copyright (C) 2012 - 2014 Patrick Schleizer <adrelanos@riseup.net>
+## See the file COPYING for copying conditions.
+
+apt_get_during_apt_get_download() {
+   sources_list="$1"
+   packages="$2"
+
+   if [ -e /var/lib/apt-during-apt/apt_get_during_apt_get_download.skip ]; then
+      return 0
+   fi
+
+   folder_list="
+      /var/lib/apt-during-apt/initial-packages
+      /var/cache/apt-during-apt/apt-get
+      /var/cache/apt-during-apt/apt-get/var/lib/apt/lists/partial
+      /var/cache/apt-during-apt/apt-get/var/cache/apt/archives/partial
+      /var/cache/apt-during-apt/dpkg
+   "
+
+   for folder in $folder_list ; do
+      rm -rf "$folder"
+      mkdir --parents "$folder"
+   done
+
+   ## apt-get refuses to work without a valid dpkg status file.
+   cp /var/lib/dpkg/status /var/cache/apt-during-apt/dpkg/status
+
+   [ -n "$EMPTY_DIR" ] || EMPTY_DIR="$(mktemp --directory)"
+
+   mkdir --parents "$EMPTY_DIR"
+
+   ## Debugging.
+   true "UWT_DEV_PASSTHROUGH: $UWT_DEV_PASSTHROUGH"
+
+   ## TODO
+   ## Debugging.
+   export UWT_VERBOSE=1
+   true "UWT_VERBOSE: UWT_VERBOSE"
+
+   ## Debugging.
+   ## Override with || true in case not installed.
+   ## This is the case when --no-default-applications is being used.
+   which torsocks || true
+   which uwt || true
+
+   ## TODO
+   if [ "$apt_get_update_wrapper" = "" ]; then
+      apt_get_update_wrapper="apt-get"
+   fi
+
+   ## If file /etc/apt/sources.list.d/torproject.list did not exist, apt-apt
+   ## would fail open and exit 0.
+   $apt_get_update_wrapper \
+      $apt_get_gpgv_opts \
+      $apt_timeout_opts \
+      $apt_misc_opts \
+      -o Dir="/var/cache/apt-during-apt/apt-get" \
+      -o Dir::State::status="/var/cache/apt-during-apt/dpkg/status" \
+      -o Dir::Etc="/etc/apt/" \
+      -o Dir::Etc::sourcelist="$sources_list" \
+      -o Dir::Etc::sourceparts="$EMPTY_DIR" \
+      update
+
+   ## Change directory into the folder where downloaded packages should be stored.
+   pushd /var/lib/apt-during-apt/initial-packages >/dev/null
+
+   ## Downloading deb.torproject.org-keyring Debian package, which helps to keep Torprojects signing key current.
+   ## Also downloading tor tor-geoipdb from The Tor Projects repository.
+   apt-get \
+      $apt_timeout_opts \
+      $apt_misc_opts \
+      --yes \
+      -o Dir="/var/cache/apt-during-apt/apt-get" \
+      -o Dir::State::status="/var/cache/apt-during-apt/dpkg/status" \
+      -o Dir::Etc="/etc/apt/" \
+      -o Dir::Etc::sourcelist="$sources_list" \
+      -o Dir::Etc::sourceparts="$EMPTY_DIR" \
+      download $packages
+
+   popd >/dev/null
+}
