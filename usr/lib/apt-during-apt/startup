@@ -11,28 +11,30 @@ if [ -e /var/lib/apt-during-apt/first_install_extra_debs.skip ]; then
    return 0
 fi
 
+exit_handler() {
+   rm -f /usr/sbin/policy-rc.d
+}
+
 ## Prevents daemons from starting (for example the Tor daemon).
 ## Since this script gets started by systemd, another instance of systemd
 ## (for example started by the 'tor' package's Debian maintainer postinst
 ## script) would block forever.
 
-delete=true
 if [ -e /usr/sbin/policy-rc.d ]; then
    delete=false
+else
+   delete=true
+   echo "exit 101" >> /usr/sbin/policy-rc.d
+   chmod +x /usr/sbin/policy-rc.d
+   trap exit_handler EXIT
 fi
-
-echo "exit 101" >> /usr/sbin/policy-rc.d
-chmod +x /usr/sbin/policy-rc.d
 
 /usr/lib/apt-during-apt/startup_helper &
 pid="$!"
 exit_code="0"
 wait "$pid" || exit_code="$?"
 
-if [ "$delete" = "true" ]; then
-   ## Allow startup of daemons again.
-   rm -f /usr/sbin/policy-rc.d
-else
+if [ "$delete" = "false" ]; then
    true "INFO: Previously existing /usr/sbin/policy-rc.d will not be deleted."
 fi
 
