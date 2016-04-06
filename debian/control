@@ -18,3 +18,6 @@ Depends: anon-shared-helper-scripts, ${misc:Depends}
 Description: Allows using apt-get during runs of apt-get
  Can download packages using apt-get during runs of apt-get from within
  Debian maintainer scripts which are later installed.
+ .
+ It will be installed at next reboot or when the apt-during-apt service is
+ manually (re)started. ('sudo service apt-during-apt restart')
