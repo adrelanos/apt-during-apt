@@ -1,5 +1,23 @@
-commit f4161bb0ee345c38b0ecafe9fbd27a6da3c970c8
+commit de90ac4474a3930c0e26f7dc530a908053a4d301
 Author: Patrick Schleizer <adrelanos@riseup.net>
-Date:   Wed Apr 6 18:34:17 2016 +0000
+Date:   Wed Apr 6 20:02:18 2016 +0000
 
-    .
+    improved exit_handler, deletion of /usr/sbin/policy-rc.d
+
+commit ebc9a7a701395608223991d8498ea0b29c24083e
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Wed Apr 6 19:52:43 2016 +0000
+
+    added non-interactivity options
+
+commit 77312b160f14838b1995c871cc8b24fe2a05140e
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Wed Apr 6 19:39:49 2016 +0000
+
+    package description
+
+commit 76183d873df81d7433f91372334b577f8bd9d609
+Author: Patrick Schleizer <adrelanos@riseup.net>
+Date:   Wed Apr 6 19:32:23 2016 +0000
+
+    initial commit
